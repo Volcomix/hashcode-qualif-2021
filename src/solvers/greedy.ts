@@ -20,6 +20,7 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
   teams.reverse();
   let pizzas = toLinkedList(dataset.pizzas);
   const ingredients = new NumberSet(10000);
+  let startTime = Date.now();
   for (const { personCount, teamCount } of teams) {
     // TODO Monte-Carlo on teams order
     for (let teamIdx = 0; teamIdx < teamCount && pizzas; teamIdx++) {
@@ -49,6 +50,11 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
         });
         progress.completed += pizzasToDeliver.length;
         self.postMessage(progress);
+        const endTime = Date.now();
+        if (endTime - startTime >= 10000) {
+          self.postMessage(submission);
+          startTime = endTime;
+        }
       } else {
         while (pizzasToDeliver.length) {
           pizzas = {
