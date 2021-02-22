@@ -4,17 +4,17 @@ import {
   Dataset,
   Pizza,
 } from "../dataset.ts";
-import { SolverProgress } from "../helpers/solver.ts";
+import { SOLVER_DONE, SolverProgress } from "../helpers/solver_worker.ts";
 import { Submission } from "../submission.ts";
 
 self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
-  const { name, teams, pizzas } = dataset;
+  const { teams, pizzas } = dataset;
   const maxPizzaCount = Math.min(
     countTotalPeople(dataset),
     countTotalPizzas(dataset),
   );
-  const submission: Submission = { name, deliveries: [] };
-  const progress: SolverProgress = { name, progress: 0, total: maxPizzaCount };
+  const submission: Submission = { deliveries: [] };
+  const progress: SolverProgress = { completed: 0, total: maxPizzaCount };
   self.postMessage(progress);
   let pizzaIdx = 0;
   for (const { personCount, teamCount } of teams) {
@@ -49,13 +49,14 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
         pizzaIdx -= pizzasToDeliver.length;
       }
       if (teamIdx % 10 === 0) {
-        progress.progress = pizzaIdx;
+        progress.completed = pizzaIdx;
         self.postMessage(progress);
       }
     }
   }
-  progress.progress = maxPizzaCount;
+  progress.completed = maxPizzaCount;
   self.postMessage(progress);
   self.postMessage(submission);
+  self.postMessage(SOLVER_DONE);
   self.close();
 };

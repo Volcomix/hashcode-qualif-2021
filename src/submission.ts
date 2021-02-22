@@ -1,7 +1,6 @@
 import { Pizza } from "./dataset.ts";
 
 export type Submission = {
-  name: string;
   deliveries: Delivery[];
 };
 
@@ -10,8 +9,8 @@ export type Delivery = {
   pizzas: Pizza[];
 };
 
-export async function writeSubmission(submission: Submission) {
-  const submissionDir = getSubmissionDirectory(submission);
+export async function writeSubmission(name: string, submission: Submission) {
+  const submissionDir = getSubmissionDirectory(name);
   try {
     await Deno.mkdir(submissionDir, { recursive: true });
   } catch {
@@ -25,22 +24,22 @@ export async function writeSubmission(submission: Submission) {
   await Deno.writeTextFile(`${submissionDir}/${fileName}`, lines.join("\n"));
 }
 
-export function getSubmissionInfo(submission: Submission) {
+export function getSubmissionInfo(name: string, submission: Submission) {
   const score = getSubmissionScore(submission);
   return {
-    "Dataset": `${submission.name}`,
+    "Dataset": name,
     "Deliveries": submission.deliveries.length,
     "Score": score,
-    "Submission file": `${getSubmissionDirectory(submission)}/${score}.out`,
+    "Submission file": `${getSubmissionDirectory(name)}/${score}.out`,
   };
 }
 
-function getSubmissionDirectory({ name }: Submission): string {
-  return `submission/${name}`;
+export function getSubmissionScore({ deliveries }: Submission): number {
+  return deliveries.reduce((score, delivery) => score + delivery.score, 0);
 }
 
-function getSubmissionScore({ deliveries }: Submission): number {
-  return deliveries.reduce((score, delivery) => score + delivery.score, 0);
+function getSubmissionDirectory(name: string): string {
+  return `submission/${name}`;
 }
 
 function formatDelivery({ pizzas }: Delivery): string {

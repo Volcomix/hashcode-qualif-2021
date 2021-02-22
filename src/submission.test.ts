@@ -3,7 +3,6 @@ import { assertEquals } from "./deps.ts";
 import { getSubmissionInfo, Submission } from "./submission.ts";
 
 export const exampleSubmission: Submission = {
-  name: exampleDataset.name,
   deliveries: [
     {
       score: 16,
@@ -24,7 +23,7 @@ export const exampleSubmission: Submission = {
 };
 
 Deno.test("getSubmissionInfo", () => {
-  assertEquals(getSubmissionInfo(exampleSubmission), {
+  assertEquals(getSubmissionInfo(exampleDataset.name, exampleSubmission), {
     "Dataset": "a_example",
     "Deliveries": 2,
     "Score": 65,

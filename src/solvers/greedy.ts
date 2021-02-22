@@ -5,17 +5,17 @@ import {
   Pizza,
 } from "../dataset.ts";
 import { NumberSet } from "../helpers/number_set.ts";
-import { SolverProgress } from "../helpers/solver.ts";
+import { SOLVER_DONE, SolverProgress } from "../helpers/solver_worker.ts";
 import { Submission } from "../submission.ts";
 
 self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
-  const { name, teams } = dataset;
+  const { teams } = dataset;
   const maxPizzaCount = Math.min(
     countTotalPeople(dataset),
     countTotalPizzas(dataset),
   );
-  const submission: Submission = { name, deliveries: [] };
-  const progress: SolverProgress = { name, progress: 0, total: maxPizzaCount };
+  const submission: Submission = { deliveries: [] };
+  const progress: SolverProgress = { completed: 0, total: maxPizzaCount };
   self.postMessage(progress);
   teams.reverse();
   let pizzas = toLinkedList(dataset.pizzas);
@@ -25,7 +25,7 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
     for (let teamIdx = 0; teamIdx < teamCount && pizzas; teamIdx++) {
       // Always ends with 3-person + 2-person deliveries
       if (
-        dataset.pizzas.length - progress.progress === 5 && personCount === 4
+        dataset.pizzas.length - progress.completed === 5 && personCount === 4
       ) {
         break;
       }
@@ -47,7 +47,7 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
           score: ingredientCount * ingredientCount,
           pizzas: pizzasToDeliver,
         });
-        progress.progress += pizzasToDeliver.length;
+        progress.completed += pizzasToDeliver.length;
         self.postMessage(progress);
       } else {
         while (pizzasToDeliver.length) {
@@ -60,9 +60,10 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
       }
     }
   }
-  progress.progress = maxPizzaCount;
+  progress.completed = maxPizzaCount;
   self.postMessage(progress);
   self.postMessage(submission);
+  self.postMessage(SOLVER_DONE);
   self.close();
 };
 
