@@ -8,7 +8,7 @@ import { NumberSet } from "../helpers/number_set.ts";
 import { SOLVER_DONE, SolverProgress } from "../helpers/solver_worker.ts";
 import { Submission } from "../submission.ts";
 
-self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
+self.onmessage = ({ data: dataset }: MessageEvent<Dataset>) => {
   const { teams } = dataset;
   const maxPizzaCount = Math.min(
     countTotalPeople(dataset),
@@ -51,7 +51,7 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
         progress.completed += pizzasToDeliver.length;
         self.postMessage(progress);
         const endTime = Date.now();
-        if (endTime - startTime >= 10000) {
+        if (endTime - startTime >= 30000) {
           self.postMessage(submission);
           startTime = endTime;
         }

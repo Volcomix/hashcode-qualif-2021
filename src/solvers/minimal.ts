@@ -16,6 +16,7 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
   const submission: Submission = { deliveries: [] };
   const progress: SolverProgress = { completed: 0, total: maxPizzaCount };
   self.postMessage(progress);
+  let startTime = Date.now();
   let pizzaIdx = 0;
   for (const { personCount, teamCount } of teams) {
     for (
@@ -48,9 +49,11 @@ self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
       } else {
         pizzaIdx -= pizzasToDeliver.length;
       }
-      if (teamIdx % 10 === 0) {
+      const endTime = Date.now();
+      if (endTime - startTime > 500) {
         progress.completed = pizzaIdx;
         self.postMessage(progress);
+        startTime = endTime;
       }
     }
   }
