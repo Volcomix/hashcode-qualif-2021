@@ -1,4 +1,3 @@
-import { SEP } from "./deps.ts";
 import { trimLines } from "./helpers/string.ts";
 
 export type Dataset = {
@@ -19,12 +18,12 @@ export type Pizza = {
 
 export async function readDataset(inputFilePath: string): Promise<Dataset> {
   const input = await Deno.readTextFile(inputFilePath);
-  const [teamsLine, ...pizzasLines] = trimLines(input.split("\n"));
+  const [teamsLine, ...pizzaLines] = trimLines(input.split("\n"));
   ingredientMap.clear();
   return {
-    name: inputFilePath.split(SEP).pop()!,
+    name: inputFilePath.split("/").pop()!,
     teams: parseTeams(teamsLine),
-    pizzas: pizzasLines.map(parsePizza),
+    pizzas: pizzaLines.map(parsePizza),
   };
 }
 
