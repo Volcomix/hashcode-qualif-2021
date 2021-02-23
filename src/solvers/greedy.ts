@@ -107,7 +107,11 @@ function deliverPizza(
         newIngredientCount++;
       }
     }
-    if (newIngredientCount > highestNewIngredientCount) {
+    if (
+      newIngredientCount > highestNewIngredientCount ||
+      (newIngredientCount === highestNewIngredientCount &&
+        current.pizza.ingredients.length < bestPizza.pizza.ingredients.length)
+    ) {
       bestPizzaPrevious = previous;
       bestPizza = current;
       highestNewIngredientCount = newIngredientCount;
