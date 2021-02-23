@@ -5,7 +5,7 @@ import {
   Pizza,
 } from "../dataset.ts";
 import { NumberSet } from "../helpers/number_set.ts";
-import { SOLVER_DONE, SolverProgress } from "../helpers/solver_worker.ts";
+import { WORKER_DONE, WorkerProgress } from "../helpers/worker.ts";
 import { Submission } from "../submission.ts";
 
 self.onmessage = ({ data: dataset }: MessageEvent<Dataset>) => {
@@ -15,14 +15,13 @@ self.onmessage = ({ data: dataset }: MessageEvent<Dataset>) => {
     countTotalPizzas(dataset),
   );
   const submission: Submission = { deliveries: [] };
-  const progress: SolverProgress = { completed: 0, total: maxPizzaCount };
+  const progress: WorkerProgress = { completed: 0, total: maxPizzaCount };
   self.postMessage(progress);
   teams.reverse();
   let pizzas = toLinkedList(dataset.pizzas);
   const ingredients = new NumberSet(10000);
   let startTime = Date.now();
   for (const { personCount, teamCount } of teams) {
-    // TODO Monte-Carlo on teams order
     for (let teamIdx = 0; teamIdx < teamCount && pizzas; teamIdx++) {
       // Always ends with 3-person + 2-person deliveries
       if (
@@ -69,7 +68,7 @@ self.onmessage = ({ data: dataset }: MessageEvent<Dataset>) => {
   progress.completed = maxPizzaCount;
   self.postMessage(progress);
   self.postMessage(submission);
-  self.postMessage(SOLVER_DONE);
+  self.postMessage(WORKER_DONE);
   self.close();
 };
 
@@ -80,9 +79,7 @@ type PizzaNode = {
 
 function toLinkedList(pizzas: Pizza[]): PizzaNode | null {
   return pizzas
-    // TODO Invert the sort and remove the reverse once greedy works
-    .sort((a, b) => b.ingredients.length - a.ingredients.length)
-    .reverse() // Just to get same result as first implem
+    .sort((a, b) => a.ingredients.length - b.ingredients.length)
     .reduce(
       (pizzaNode, pizza) => ({ pizza, next: pizzaNode }),
       null as PizzaNode | null,

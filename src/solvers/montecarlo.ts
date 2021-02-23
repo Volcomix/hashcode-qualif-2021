@@ -1,11 +1,11 @@
 import { Dataset, Pizza } from "../dataset.ts";
 import { shuffle } from "../helpers/array.ts";
 import { NumberSet } from "../helpers/number_set.ts";
-import { SolverProgress } from "../helpers/solver_worker.ts";
+import { WorkerProgress } from "../helpers/worker.ts";
 import { getSubmissionScore, Submission } from "../submission.ts";
 
 self.onmessage = ({ data: dataset }: MessageEvent<Dataset>) => {
-  const progress: SolverProgress = { completed: 0, total: 100000 };
+  const progress: WorkerProgress = { completed: 0, total: 100000 };
   self.postMessage(progress);
   const { pizzas } = dataset;
   const teams = dataset.teams.flatMap(({ personCount, teamCount }) =>
