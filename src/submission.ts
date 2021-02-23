@@ -50,6 +50,20 @@ export function getSubmissionInfo(name: string, submission: Submission) {
   };
 }
 
+export function getDeliveryScore(pizzas: Pizza[]) {
+  ingredients.clear();
+  let ingredientCount = 0;
+  for (const pizza of pizzas) {
+    for (const ingredient of pizza.ingredients) {
+      if (!ingredients.has(ingredient)) {
+        ingredients.add(ingredient);
+        ingredientCount++;
+      }
+    }
+  }
+  return ingredientCount * ingredientCount;
+}
+
 export function getSubmissionScore({ deliveries }: Submission): number {
   return deliveries.reduce((score, delivery) => score + delivery.score, 0);
 }
@@ -85,17 +99,3 @@ function parseDelivery(line: string, dataset: Dataset): Delivery {
 }
 
 const ingredients = new NumberSet(10000);
-
-function getDeliveryScore(pizzas: Pizza[]) {
-  ingredients.clear();
-  let ingredientCount = 0;
-  for (const pizza of pizzas) {
-    for (const ingredient of pizza.ingredients) {
-      if (!ingredients.has(ingredient)) {
-        ingredients.add(ingredient);
-        ingredientCount++;
-      }
-    }
-  }
-  return ingredientCount * ingredientCount;
-}
