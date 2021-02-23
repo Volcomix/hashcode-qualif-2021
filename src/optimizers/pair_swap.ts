@@ -1,36 +1,22 @@
 import { Pizza } from "../dataset.ts";
 import { OptimizerMessageEventData } from "../helpers/optimizer_worker.ts";
 import { WorkerProgress } from "../helpers/worker.ts";
-import { Delivery, getDeliveryScore } from "../submission.ts";
+import { Delivery, getDeliveryScore, Submission } from "../submission.ts";
 
 self.onmessage = (
   { data: { dataset, submission } }: MessageEvent<OptimizerMessageEventData>,
 ) => {
   const progress: WorkerProgress = { completed: 0, total: 1000000 };
   self.postMessage(progress);
-  const { deliveries } = submission;
   const remainingPizzasSet = new Set(dataset.pizzas);
-  for (const delivery of deliveries) {
+  for (const delivery of submission.deliveries) {
     delivery.pizzas.forEach((pizza) => remainingPizzasSet.delete(pizza));
   }
   // TODO Try to also swap delivered pizzas with remaining ones
   const remainingPizzas = [...remainingPizzasSet];
   let startTime = Date.now();
   while (true) {
-    const delivery1 = randomDelivery(deliveries);
-    const delivery2 = randomDelivery(deliveries);
-    const pizzaIdx1 = randomPizzaIdx(delivery1.pizzas);
-    const pizzaIdx2 = randomPizzaIdx(delivery2.pizzas);
-    swapPizzas(delivery1, delivery2, pizzaIdx1, pizzaIdx2);
-    const score1 = getDeliveryScore(delivery1.pizzas);
-    const score2 = getDeliveryScore(delivery2.pizzas);
-    if (score1 + score2 > delivery1.score + delivery2.score) {
-      delivery1.score = score1;
-      delivery2.score = score2;
-      self.postMessage(submission);
-    } else {
-      swapPizzas(delivery1, delivery2, pizzaIdx1, pizzaIdx2);
-    }
+    swapBetweenTeams(submission);
     progress.completed = (progress.completed + 1) % progress.total;
     const endTime = Date.now();
     if (endTime - startTime > 500) {
@@ -39,6 +25,23 @@ self.onmessage = (
     }
   }
 };
+
+function swapBetweenTeams(submission: Submission) {
+  const delivery1 = randomDelivery(submission.deliveries);
+  const delivery2 = randomDelivery(submission.deliveries);
+  const pizzaIdx1 = randomPizzaIdx(delivery1.pizzas);
+  const pizzaIdx2 = randomPizzaIdx(delivery2.pizzas);
+  swapPizzas(delivery1, delivery2, pizzaIdx1, pizzaIdx2);
+  const score1 = getDeliveryScore(delivery1.pizzas);
+  const score2 = getDeliveryScore(delivery2.pizzas);
+  if (score1 + score2 > delivery1.score + delivery2.score) {
+    delivery1.score = score1;
+    delivery2.score = score2;
+    self.postMessage(submission);
+  } else {
+    swapPizzas(delivery1, delivery2, pizzaIdx1, pizzaIdx2);
+  }
+}
 
 function randomDelivery(deliveries: Delivery[]) {
   return deliveries[Math.floor(Math.random() * deliveries.length)];

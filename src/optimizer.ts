@@ -1,6 +1,5 @@
 import { getDatasetInfo, readDataset } from "./dataset.ts";
 import { OptimizerWorker } from "./helpers/optimizer_worker.ts";
-import { SolverWorker } from "./helpers/solver_worker.ts";
 import {
   getSubmissionInfo,
   readSubmission,
@@ -16,7 +15,6 @@ const submissionInfos = submissions.map((submission, i) =>
 const optimizerWorkers = datasets.map((dataset, i) =>
   new OptimizerWorker(dataset, submissions[i], "pair_swap")
 );
-// TODO Factorize common code with solver.ts
 const intervalId = setInterval(printProgress, 1000);
 const sig = Deno.signal(Deno.Signal.SIGINT);
 await Promise.race([

@@ -23,7 +23,7 @@ deno run --unstable --allow-read=input --allow-write=submission src/solver.ts in
 
 **Note:** You can also allow all permissions with `deno run --unstable -A src/solver.ts input/*`
 
-### [WIP] `deno run --unstable --allow-read=input,submission,src/optimizers --allow-write=submission src/optimizer.ts input/*`
+### `deno run --unstable --allow-read=input,submission,src/optimizers --allow-write=submission src/optimizer.ts input/*`
 
 Runs the optimizer program with all the input files to optimize the submission file with the highest score for each input dataset.
 
