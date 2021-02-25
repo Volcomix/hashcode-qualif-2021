@@ -1,21 +1,5 @@
 import { trimLines } from "./helpers/string.ts";
 
-export type Dataset = {
-  name: string;
-  teams: Team[];
-  pizzas: Pizza[];
-};
-
-export type Team = {
-  personCount: number;
-  teamCount: number;
-};
-
-export type Pizza = {
-  id: number;
-  ingredients: number[];
-};
-
 export async function readDataset(inputFilePath: string): Promise<Dataset> {
   const input = await Deno.readTextFile(inputFilePath);
   const [teamsLine, ...pizzaLines] = trimLines(input.split("\n"));
