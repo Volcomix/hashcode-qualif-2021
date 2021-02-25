@@ -57,6 +57,7 @@ function runSchedule(dataset: Dataset, submission: Submission) {
         streetIdxs.set(car, streetIdx);
         const street = car.paths[streetIdx];
         secondsToNextStreet.set(car, second + street.duration);
+        // TODO Handle lights
       }
     }
   }
