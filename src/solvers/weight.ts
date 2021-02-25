@@ -33,7 +33,9 @@ self.onmessage = async ({ data: inputFilePath }: MessageEvent<string>) => {
       }
     }
 
-    submission.schedules.push({ intersection, items });
+    if (items.length > 0) {
+      submission.schedules.push({ intersection, items });
+    }
   }
 
   progress.completed = 1;
