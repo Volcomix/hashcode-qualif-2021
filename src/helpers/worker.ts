@@ -28,6 +28,9 @@ export abstract class WorkerBase {
     };
     this.worker = new Worker(new URL(workerUrl, import.meta.url).href, {
       type: "module",
+      deno: {
+        namespace: true,
+      },
     });
     this.promise = new Promise((resolve) => {
       let highestSubmissionScore = -Infinity;

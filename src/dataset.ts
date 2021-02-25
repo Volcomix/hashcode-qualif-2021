@@ -46,6 +46,7 @@ export async function readDataset(inputFilePath: string): Promise<Dataset> {
   }
 
   return {
+    inputFilePath,
     name: inputFilePath.split("/").pop()!,
     duration,
     streets,

@@ -1,65 +1,32 @@
-import {
-  countTotalPeople,
-  countTotalPizzas,
-  Dataset,
-  Pizza,
-} from "../dataset.ts";
 import { WORKER_DONE, WorkerProgress } from "../helpers/worker.ts";
-import { Submission } from "../submission.ts";
+import { Dataset, Submission } from "../model.ts";
+import { readDataset } from "../dataset.ts";
+import { writeSubmission } from "../submission.ts";
 
-self.onmessage = async ({ data: dataset }: MessageEvent<Dataset>) => {
-  const { teams, pizzas } = dataset;
-  const maxPizzaCount = Math.min(
-    countTotalPeople(dataset),
-    countTotalPizzas(dataset),
-  );
-  const submission: Submission = { deliveries: [] };
-  const progress: WorkerProgress = { completed: 0, total: maxPizzaCount };
+self.onmessage = async ({ data: inputFilePath }: MessageEvent<string>) => {
+  const dataset = await readDataset(inputFilePath);
+  const submission: Submission = { schedules: [] };
+
+  const progress: WorkerProgress = {
+    completed: 0,
+    total: 1,
+  };
+
   self.postMessage(progress);
-  let startTime = Date.now();
-  let pizzaIdx = 0;
-  for (const { personCount, teamCount } of teams) {
-    for (
-      let teamIdx = 0;
-      teamIdx < teamCount && pizzaIdx < pizzas.length &&
-      personCount <= pizzas.length - pizzaIdx;
-      teamIdx++
-    ) {
-      const pizzasToDeliver: Pizza[] = [];
-      const ingredients = new Set<number>();
-      for (
-        let personIdx = 0;
-        personIdx < personCount && pizzaIdx < pizzas.length;
-        personIdx++
-      ) {
-        // Uncomment next line to simulate long processing
-        // await new Promise((resolve) => setTimeout(resolve));
 
-        const pizza = pizzas[pizzaIdx++];
-        pizzasToDeliver.push(pizza);
-        for (const ingredient of pizza.ingredients) {
-          ingredients.add(ingredient);
-        }
-      }
-      if (pizzasToDeliver.length === personCount) {
-        submission.deliveries.push({
-          score: ingredients.size * ingredients.size,
-          pizzas: pizzasToDeliver,
-        });
-      } else {
-        pizzaIdx -= pizzasToDeliver.length;
-      }
-      const endTime = Date.now();
-      if (endTime - startTime > 500) {
-        progress.completed = pizzaIdx;
-        self.postMessage(progress);
-        startTime = endTime;
-      }
-    }
+  //let startTime = Date.now();
+
+  for (const intersection of dataset.intersections) {
+    submission.schedules.push({
+      intersection,
+      items: [{ duration: dataset.duration, street: intersection.arrivals[0] }],
+    });
   }
-  progress.completed = maxPizzaCount;
+
+  progress.completed = 1;
   self.postMessage(progress);
-  self.postMessage(submission);
+  //self.postMessage(submission);
+  await writeSubmission(dataset.name, submission);
   self.postMessage(WORKER_DONE);
   self.close();
 };

@@ -5,6 +5,7 @@ export type Intersection = {
 };
 
 export type Dataset = {
+  inputFilePath: string;
   name: string;
   duration: number;
   streets: Street[];

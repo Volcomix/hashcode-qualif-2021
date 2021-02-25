@@ -5,7 +5,7 @@ import { getSubmissionInfo, writeSubmission } from "./submission.ts";
 const datasets = await Promise.all(Deno.args.map(readDataset));
 const datasetInfos = datasets.map(getDatasetInfo);
 const solverWorkers = datasets.map((dataset) =>
-  new SolverWorker(dataset, "greedy")
+  new SolverWorker(dataset, "minimal")
 );
 const intervalId = setInterval(printProgress, 1000);
 const sig = Deno.signal(Deno.Signal.SIGINT);
