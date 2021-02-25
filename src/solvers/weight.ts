@@ -27,10 +27,10 @@ self.onmessage = async ({ data: inputFilePath }: MessageEvent<string>) => {
     const items: ScheduleItem[] = [];
 
     for (const street of intersection.arrivals) {
-      items.push({
-        duration: weights[street.id],
-        street,
-      });
+      const duration = weights[street.id];
+      if (duration > 0) {
+        items.push({ duration, street });
+      }
     }
 
     submission.schedules.push({ intersection, items });
