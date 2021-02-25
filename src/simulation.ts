@@ -7,7 +7,9 @@ import {
   Submission,
 } from "./model.ts";
 
-export function simulate(dataset: Dataset, submission: Submission) {
+export function simulate(dataset: Dataset, submission: Submission): number[] {
+  const timeByLight = dataset.streets.map((_) => 0);
+
   const lights = new Map<Intersection, Street>();
   const carsByLight = new Map<Street, Car[]>(
     dataset.streets.map((street) => ([street, []])),
@@ -36,6 +38,10 @@ export function simulate(dataset: Dataset, submission: Submission) {
   let score = 0;
 
   for (let second = 0; second < dataset.duration; second++) {
+    for (let i = 0; i < dataset.streets.length; i++) {
+      const st = dataset.streets[i];
+      timeByLight[i] += carsByLight.get(st)!.length;
+    }
     for (const intersection of dataset.intersections) {
       const schedule = schedulesByIntersection.get(intersection);
       if (!schedule) {
@@ -61,7 +67,7 @@ export function simulate(dataset: Dataset, submission: Submission) {
       if (secondToEnd === second) {
         let streetIdx = streetIdxs.get(car)!;
         drivingCars.delete(car);
-        if (streetIdx === car.paths.length) {
+        if (streetIdx === car.paths.length - 1) {
           score += dataset.bonusPerCar + dataset.duration - second;
           continue;
         }
@@ -84,5 +90,6 @@ export function simulate(dataset: Dataset, submission: Submission) {
   }
 
   submission.score = score;
-  return score;
+
+  return timeByLight;
 }
