@@ -9,6 +9,9 @@ import {
 
 function runSchedule(dataset: Dataset, submission: Submission) {
   const lights = new Map<Intersection, Street>();
+  const carsByLight = new Map<Street, Car[]>(
+    dataset.streets.map((street) => ([street, []])),
+  );
   const schedulesByIntersection = new Map<Intersection, Schedule>(
     submission.schedules.map((schedule) => ([schedule.intersection, schedule])),
   );
@@ -21,9 +24,14 @@ function runSchedule(dataset: Dataset, submission: Submission) {
   const streetIdxs = new Map<Car, number>(
     dataset.cars.map((car) => ([car, 0])),
   );
-  const secondsToNextStreet = new Map<Car, number>(
+  const secondsToEnd = new Map<Car, number>(
     dataset.cars.map((car) => ([car, 0])),
   );
+  const drivingCars = new Set<Car>();
+
+  for (const car of dataset.cars) {
+    carsByLight.get(car.paths[0])!.push(car);
+  }
 
   for (let second = 0; second < dataset.duration; second++) {
     for (const intersection of dataset.intersections) {
@@ -46,19 +54,29 @@ function runSchedule(dataset: Dataset, submission: Submission) {
         );
       }
     }
-    for (const car of dataset.cars) {
-      const secondToNextStreet = secondsToNextStreet.get(car)!;
-      if (secondToNextStreet === second) {
+    for (const car of drivingCars) {
+      const secondToEnd = secondsToEnd.get(car)!;
+      if (secondToEnd === second) {
         let streetIdx = streetIdxs.get(car)!;
-        streetIdx++;
+        drivingCars.delete(car);
         if (streetIdx === car.paths.length) {
           // TODO Score and remove car
         }
-        streetIdxs.set(car, streetIdx);
         const street = car.paths[streetIdx];
-        secondsToNextStreet.set(car, second + street.duration);
-        // TODO Handle lights
+        carsByLight.get(street)!.push(car);
+        streetIdx++;
+        streetIdxs.set(car, streetIdx);
       }
+    }
+    for (const street of lights.values()) {
+      const car = carsByLight.get(street)!.shift();
+      if (!car) {
+        continue;
+      }
+      drivingCars.add(car);
+      let streetIdx = streetIdxs.get(car)!;
+      const nextStreet = car.paths[streetIdx];
+      secondsToEnd.set(car, second + nextStreet.duration);
     }
   }
 }
