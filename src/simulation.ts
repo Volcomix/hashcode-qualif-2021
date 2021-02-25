@@ -7,7 +7,7 @@ import {
   Submission,
 } from "./model.ts";
 
-function runSchedule(dataset: Dataset, submission: Submission) {
+function simulate(dataset: Dataset, submission: Submission) {
   const lights = new Map<Intersection, Street>();
   const carsByLight = new Map<Street, Car[]>(
     dataset.streets.map((street) => ([street, []])),
@@ -32,6 +32,8 @@ function runSchedule(dataset: Dataset, submission: Submission) {
   for (const car of dataset.cars) {
     carsByLight.get(car.paths[0])!.push(car);
   }
+
+  let score = 0;
 
   for (let second = 0; second < dataset.duration; second++) {
     for (const intersection of dataset.intersections) {
@@ -60,7 +62,7 @@ function runSchedule(dataset: Dataset, submission: Submission) {
         let streetIdx = streetIdxs.get(car)!;
         drivingCars.delete(car);
         if (streetIdx === car.paths.length) {
-          // TODO Score and remove car
+          score += dataset.bonusPerCar + dataset.duration - second;
         }
         const street = car.paths[streetIdx];
         carsByLight.get(street)!.push(car);
@@ -79,4 +81,6 @@ function runSchedule(dataset: Dataset, submission: Submission) {
       secondsToEnd.set(car, second + nextStreet.duration);
     }
   }
+
+  return score;
 }
