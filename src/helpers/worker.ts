@@ -1,4 +1,5 @@
-import { getSubmissionScore, Submission } from "../submission.ts";
+import { Submission } from "../model.ts";
+import { getSubmissionScore } from "../submission.ts";
 
 export type WorkerProgress = {
   completed: number;

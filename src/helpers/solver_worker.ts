@@ -1,4 +1,4 @@
-import { Dataset } from "../dataset.ts";
+import { Dataset } from "../model.ts";
 import { WorkerBase } from "./worker.ts";
 
 export class SolverWorker extends WorkerBase {

@@ -58,64 +58,20 @@ export async function readDataset(inputFilePath: string): Promise<Dataset> {
 export function getDatasetInfo(dataset: Dataset) {
   return {
     "Dataset": dataset.name,
-    "Teams": countTotalTeams(dataset),
-    "People": countTotalPeople(dataset),
-    "Pizzas": countTotalPizzas(dataset),
-    "Ingredients": countTotalIngredients(dataset),
-  };
-}
-
-export function countTotalTeams({ teams }: Dataset) {
-  return teams.reduce(
-    (count, { teamCount }) => count + teamCount,
-    0,
-  );
-}
-
-export function countTotalPeople({ teams }: Dataset) {
-  return teams.reduce(
-    (count, { personCount, teamCount }) => count + personCount * teamCount,
-    0,
-  );
-}
-
-export function countTotalPizzas({ pizzas }: Dataset) {
-  return pizzas.length;
-}
-
-export function countTotalIngredients({ pizzas }: Dataset) {
-  return pizzas.reduce((ingredients, pizza) => {
-    pizza.ingredients.forEach((ingredient) => ingredients.add(ingredient));
-    return ingredients;
-  }, new Set<number>()).size;
-}
-
-let ingredientMap = new Map<string, number>();
-
-function parseTeams(line: string): Team[] {
-  return line.split(" ")
-    .slice(1)
-    .map(Number)
-    .map((teamCount, i) => ({
-      personCount: i + 2,
-      teamCount,
-    }));
-}
-
-function parsePizza(line: string, pizzaId: number): Pizza {
-  return {
-    id: pizzaId,
-    ingredients: line.split(" ").slice(1).map((ingredientString) => {
-      let ingredient = ingredientMap.get(ingredientString);
-      if (ingredient === undefined) {
-        ingredient = ingredientMap.size;
-        ingredientMap.set(ingredientString, ingredient);
-      }
-      return ingredient;
-    }),
+    "Duration": dataset.duration,
+    "Streets": dataset.streets.length,
+    "Intersections": dataset.intersections.length,
+    "Cars": dataset.cars.length,
+    "Avg Path length": computeAvgPathLength(dataset),
+    "Bonus per car": dataset.bonusPerCar,
   };
 }
 
 function parseNumbers(line: string) {
   return line.split(" ").map(Number);
+}
+
+function computeAvgPathLength(dataset: Dataset) {
+  const sum = dataset.cars.reduce((acc, car) => acc + car.paths.length, 0);
+  return sum / dataset.cars.length;
 }
