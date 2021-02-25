@@ -15,6 +15,7 @@ export type Dataset = {
 };
 
 export type Street = {
+  id: number;
   name: string;
   from: Intersection;
   to: Intersection;

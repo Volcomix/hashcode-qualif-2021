@@ -29,7 +29,7 @@ export async function readDataset(inputFilePath: string): Promise<Dataset> {
     const to = intersections[Number(estr)];
     const duration = Number(durationstr);
 
-    const street: Street = { name, from, to, duration };
+    const street: Street = { id: i, name, from, to, duration };
     streets[i] = street;
     from.departures.push(street);
     to.arrivals.push(street);
