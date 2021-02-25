@@ -1,15 +1,7 @@
-import { Dataset, Pizza, readDataset } from "./dataset.ts";
+import { readDataset } from "./dataset.ts";
 import { NumberSet } from "./helpers/number_set.ts";
 import { trimLines } from "./helpers/string.ts";
-
-export type Submission = {
-  deliveries: Delivery[];
-};
-
-export type Delivery = {
-  score: number;
-  pizzas: Pizza[];
-};
+import { Dataset, Schedule, Submission } from "./model.ts";
 
 export async function writeSubmission(name: string, submission: Submission) {
   const submissionDirPath = getSubmissionDirPath(name);
@@ -20,8 +12,8 @@ export async function writeSubmission(name: string, submission: Submission) {
   }
   const fileName = `${getSubmissionScore(submission)}.out`;
   const lines = [
-    `${submission.deliveries.length}`,
-    ...submission.deliveries.map(formatDelivery),
+    `${submission.schedules.length}`,
+    ...submission.schedules.flatMap(formatSchedule),
   ];
   await Deno.writeTextFile(
     `${submissionDirPath}/${fileName}`,
@@ -29,43 +21,43 @@ export async function writeSubmission(name: string, submission: Submission) {
   );
 }
 
-export async function readSubmission(
-  dataset: Dataset,
-): Promise<Submission> {
-  const submissionFilePath = await getBestSubmissionFilePath(dataset);
-  const content = await Deno.readTextFile(submissionFilePath);
-  const [_deliveryCountLine, ...deliveryLines] = trimLines(content.split("\n"));
-  return {
-    deliveries: deliveryLines.map((line) => parseDelivery(line, dataset)),
-  };
-}
+// export async function readSubmission(
+//   dataset: Dataset,
+// ): Promise<Submission> {
+//   const submissionFilePath = await getBestSubmissionFilePath(dataset);
+//   const content = await Deno.readTextFile(submissionFilePath);
+//   const [_deliveryCountLine, ...deliveryLines] = trimLines(content.split("\n"));
+//   return {
+//     deliveries: deliveryLines.map((line) => parseDelivery(line, dataset)),
+//   };
+// }
 
 export function getSubmissionInfo(name: string, submission: Submission) {
   const score = getSubmissionScore(submission);
   return {
     "Dataset": name,
-    "Deliveries": submission.deliveries.length,
+    "Schedules": submission.schedules.length,
     "Score": score,
     "Submission file": `${getSubmissionDirPath(name)}/${score}.out`,
   };
 }
 
-export function getDeliveryScore(pizzas: Pizza[]) {
-  ingredients.clear();
-  let ingredientCount = 0;
-  for (const pizza of pizzas) {
-    for (const ingredient of pizza.ingredients) {
-      if (!ingredients.has(ingredient)) {
-        ingredients.add(ingredient);
-        ingredientCount++;
-      }
-    }
-  }
-  return ingredientCount * ingredientCount;
-}
+// export function getDeliveryScore(pizzas: Pizza[]) {
+// ingredients.clear();
+// let ingredientCount = 0;
+// for (const pizza of pizzas) {
+//   for (const ingredient of pizza.ingredients) {
+//     if (!ingredients.has(ingredient)) {
+//       ingredients.add(ingredient);
+//       ingredientCount++;
+//     }
+//   }
+// }
+// return ingredientCount * ingredientCount;
+// }
 
-export function getSubmissionScore({ deliveries }: Submission): number {
-  return deliveries.reduce((score, delivery) => score + delivery.score, 0);
+export function getSubmissionScore({ schedules }: Submission): number {
+  return 0;
 }
 
 function getSubmissionDirPath(name: string): string {
@@ -84,18 +76,22 @@ async function getBestSubmissionFilePath(dataset: Dataset): Promise<string> {
   return `${submissionDirPath}/${highestScore}.out`;
 }
 
-function formatDelivery({ pizzas }: Delivery): string {
-  return `${pizzas.length} ${pizzas.map(({ id }) => id).join(" ")}`;
+function formatSchedule({ intersection, items }: Schedule): string[] {
+  return [
+    `${intersection.id}`,
+    `${items.length}`,
+    ...items.map(({ street, duration }) => `${street.name} ${duration}`),
+  ];
 }
 
-function parseDelivery(line: string, dataset: Dataset): Delivery {
-  const pizzas = line.split(" ").slice(1).map(Number).map((pizzaId) =>
-    dataset.pizzas[pizzaId]
-  );
-  return {
-    score: getDeliveryScore(pizzas),
-    pizzas,
-  };
-}
+// function parseDelivery(line: string, dataset: Dataset): Delivery {
+//   const pizzas = line.split(" ").slice(1).map(Number).map((pizzaId) =>
+//     dataset.pizzas[pizzaId]
+//   );
+//   return {
+//     score: getDeliveryScore(pizzas),
+//     pizzas,
+//   };
+// }
 
 const ingredients = new NumberSet(10000);
