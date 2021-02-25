@@ -28,6 +28,7 @@ export type Car = {
 
 export type Submission = {
   schedules: Schedule[];
+  score: number;
 };
 
 export type ScheduleItem = {

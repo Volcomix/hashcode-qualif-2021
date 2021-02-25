@@ -10,7 +10,7 @@ export async function writeSubmission(name: string, submission: Submission) {
   } catch {
     // Submission directory already exists
   }
-  const fileName = `${getSubmissionScore(submission)}.out`;
+  const fileName = `${submission.score}.out`;
   const lines = [
     `${submission.schedules.length}`,
     ...submission.schedules.flatMap(formatSchedule),

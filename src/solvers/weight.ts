@@ -26,8 +26,24 @@ self.onmessage = async ({ data: inputFilePath }: MessageEvent<string>) => {
   for (const intersection of dataset.intersections) {
     const items: ScheduleItem[] = [];
 
-    for (const street of intersection.arrivals) {
-      const duration = weights[street.id];
+    const totalWeight = intersection.arrivals.reduce(
+      (acc, street) => acc + weights[street.id],
+      0,
+    );
+
+    const weightPerArrival = intersection.arrivals.map((street) => ({
+      street,
+      weight: weights[street.id],
+    })).filter(({ weight }) => weight > 0);
+
+    // avg 3 sec per arrival
+    const totalDuration = weightPerArrival.length * 3;
+
+    for (const { street, weight } of weightPerArrival) {
+      const duration = Math.min(
+        1,
+        Math.round(totalDuration * weight / totalWeight),
+      );
       if (duration > 0) {
         items.push({ duration, street });
       }
