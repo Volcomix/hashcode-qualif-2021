@@ -61,7 +61,9 @@ export function getDatasetInfo(dataset: Dataset) {
     "Dataset": dataset.name,
     "Duration": dataset.duration,
     "Streets": dataset.streets.length,
+    "Avg street duration": computeAvgStreetDuration(dataset),
     "Intersections": dataset.intersections.length,
+    "Avg cars per intersection": computeIntersectionCars(dataset),
     "Cars": dataset.cars.length,
     "Avg Path length": computeAvgPathLength(dataset),
     "Bonus per car": dataset.bonusPerCar,
@@ -73,6 +75,24 @@ function parseNumbers(line: string) {
 }
 
 function computeAvgPathLength(dataset: Dataset) {
-  const sum = dataset.cars.reduce((acc, car) => acc + car.paths.length, 0);
-  return sum / dataset.cars.length;
+  return avg(dataset.cars.map((car) => car.paths.length));
+}
+
+function computeAvgStreetDuration(dataset: Dataset) {
+  return avg(dataset.streets.map((street) => street.duration));
+}
+
+function computeIntersectionCars(dataset: Dataset) {
+  const intersectionsCounts = new Array(dataset.intersections.length).fill(0);
+  for (const car of dataset.cars) {
+    for (const street of car.paths.slice(0, -1)) {
+      ++intersectionsCounts[street.to.id];
+    }
+  }
+  return avg(intersectionsCounts);
+}
+
+function avg(array: number[]) {
+  const sum = array.reduce((acc, value) => acc + value, 0);
+  return sum / array.length;
 }
