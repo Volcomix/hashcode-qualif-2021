@@ -1,4 +1,5 @@
 export type Intersection = {
+  id: number;
   arrivals: Street[];
   departures: Street[];
 };
